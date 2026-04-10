@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Virtual Pet DFA: keseharian di kampus</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="header">
+      <h1 class="title">Virtual Pet DFA kampus</h1>
+      <p class="subtitle">Pet Hiu Kampus · perilaku mengikuti <strong>DFA</strong> (Σ = { FEED, PLAY, SLEEP, STUDY })</p>
+    </header>
+
+    <main class="card setup-card">
+      <label class="label" for="petNameInput">Nama pet kamu</label>
+      <div class="name-row">
+        <input type="text" id="petNameInput" class="name-input" maxlength="32" placeholder="Contoh: Jono" value="Jono" />
+        <button type="button" id="btnSaveName" class="btn-secondary">Simpan nama</button>
+      </div>
+      <p class="hint">Tiap kali halaman dibuka, <strong>kondisi awal diacak</strong> dari Q tanpa DEAD. Pemulihan berjalan <strong>bertahap</strong> — tidak ada lompatan instan ke HAPPY. Aturan δ tetap deterministik.</p>
+      <div class="name-row setup-extra">
+        <button type="button" id="btnRandomStart" class="btn-secondary">Acak kondisi awal lagi</button>
+      </div>
+    </main>
+
+    <section class="card pet-card" id="petCard" data-state="HAPPY">
+      <div class="pet-container">
+        <div class="pet-character" id="petCharacter" role="img" aria-label="Pet Hiu Kampus">
+          <div class="shark-tank">
+            <div class="shark">
+              <span class="shark-fin shark-fin--dorsal" aria-hidden="true"></span>
+              <span class="shark-fin shark-fin--tail" aria-hidden="true"></span>
+              <span class="shark-fin shark-fin--pec-L" aria-hidden="true"></span>
+              <span class="shark-fin shark-fin--pec-R" aria-hidden="true"></span>
+              <div class="shark-head" aria-hidden="true">
+                <span class="shark-belly"></span>
+                <span class="shark-gill"></span>
+                <div class="shark-eye shark-eye--L">
+                  <span class="shark-pupil"></span>
+                  <span class="shark-eye-x"></span>
+                </div>
+                <div class="shark-eye shark-eye--R">
+                  <span class="shark-pupil"></span>
+                  <span class="shark-eye-x"></span>
+                </div>
+                <span class="shark-tear shark-tear--L"></span>
+                <span class="shark-tear shark-tear--R"></span>
+                <span class="shark-mouth"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pet-header">
+        <span class="pet-label">Pet</span>
+        <h2 class="pet-display-name" id="petDisplayName">Jono</h2>
+      </div>
+      <div class="state-block">
+        <span class="state-pill" id="statePill">HAPPY</span>
+        <p class="state-description" id="stateDescription"></p>
+      </div>
+      <p class="narration" id="narration" aria-live="polite"></p>
+      <div class="game-over" id="gameOver" hidden>
+        <strong>Game Over — Burnout Total.</strong> Pet kamu udah di state <code>DEAD</code>. State ini penyerap (absorbing) — semua aksi δ mengembalikan ke <code>DEAD</code>. Nggak ada jalan keluar.
+      </div>
+    </section>
+
+    <section class="card actions-card">
+      <h3 class="section-title">Aksi (alfabet Σ = { FEED, PLAY, SLEEP, STUDY })</h3>
+      <div class="btn-grid">
+        <button type="button" class="action-btn btn-feed" data-action="FEED">🍱 Feed</button>
+        <button type="button" class="action-btn btn-play" data-action="PLAY">🎮 Play</button>
+        <button type="button" class="action-btn btn-sleep" data-action="SLEEP">😴 Sleep</button>
+        <button type="button" class="action-btn btn-study" data-action="STUDY">📚 Study</button>
+      </div>
+    </section>
+
+    <section class="card log-card">
+      <h3 class="section-title">Log aktivitas</h3>
+      <div class="log-chat" id="logChat" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
