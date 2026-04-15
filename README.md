@@ -1,3 +1,5 @@
+Link Preview Pet : https://virtual-pet-tekom.vercel.app/
+
 # 🦈 Virtual Pet DFA: Kisah Hiu di Kampus 🎓
 
 Aplikasi web interaktif (HTML, CSS, JavaScript) yang mensimulasikan **Virtual Pet** dengan perilaku yang dikendalikan sepenuhnya oleh **Deterministic Finite Automaton (DFA)**. Proyek ini dirancang untuk memvisualisasikan konsep Teori Bahasa dan Automata melalui interaksi yang menyenangkan dan realistis dalam konteks kehidupan mahasiswa. 🚀
