@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Virtual Pet DFA: keseharian di kampus</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="wrap">
@@ -75,6 +75,16 @@
         <button type="button" class="action-btn btn-sleep" data-action="SLEEP">😴 Sleep</button>
         <button type="button" class="action-btn btn-study" data-action="STUDY">📚 Study</button>
       </div>
+      <div class="dfa-legend">
+        <p><strong>Panduan Simbol DFA:</strong></p>
+        <ul>
+          <li><strong>Q:</strong> Himpunan semua kondisi pet (Normal, Happy, dll).</li>
+          <li><strong>Σ (Alfabet):</strong> Pilihan aksi yang bisa kamu berikan ke pet.</li>
+          <li><strong>δ (Transisi):</strong> Aturan perubahan kondisi berdasarkan aksi.</li>
+          <li><strong>q₀:</strong> Kondisi awal pet saat hari dimulai.</li>
+          <li><strong>F:</strong> Kondisi akhir/permanen (Dead/Burnout).</li>
+        </ul>
+      </div>
     </section>
 
     <section class="card log-card">
@@ -83,6 +93,6 @@
     </section>
   </div>
 
-  <script src="js/script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

@@ -54,6 +54,14 @@ body[data-pet-state]::before {
   opacity: 1;
 }
 
+/* NORMAL: tenang & stabil (biru-langit / abu-abu kebiruan) */
+body[data-pet-state="NORMAL"]::before {
+  background:
+    radial-gradient(ellipse 120% 60% at 50% 0%, rgba(14, 165, 233, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse 100% 80% at 100% 100%, rgba(56, 189, 248, 0.15) 0%, transparent 50%),
+    var(--bg);
+}
+
 /* HAPPY: terang & “sumeriah” (hijau-teal cerah) */
 body[data-pet-state="HAPPY"]::before {
   background:
@@ -484,6 +492,42 @@ body.pet-ready #petCard {
 
 /* ========== Ekspresi per state DFA (induk: #petCard[data-state]) ========== */
 
+/* NORMAL: wajah tenang, mata terbuka lebar & bulat (netral), mulut datar */
+.pet-card[data-state="NORMAL"] .shark {
+  animation: sharkBobNormal 3s ease-in-out infinite;
+}
+
+@keyframes sharkBobNormal {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.pet-card[data-state="NORMAL"] .shark-eye {
+  height: 26px; /* Mata bulat penuh */
+  top: 36%;
+}
+
+.pet-card[data-state="NORMAL"] .shark-pupil {
+  width: 13px;
+  height: 13px;
+  transform: translate(-50%, -50%); /* Pupil di tengah */
+}
+
+.pet-card[data-state="NORMAL"] .shark-mouth {
+  width: 38px;
+  height: 10px;
+  border: solid #1e293b;
+  border-width: 0 0 3px 0;
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  background: transparent;
+}
+
+/* Sembunyikan garis insang (gills) di state NORMAL & HAPPY agar tidak terlihat lelah */
+.pet-card[data-state="NORMAL"] .shark-gill,
+.pet-card[data-state="HAPPY"] .shark-gill {
+  opacity: 0;
+}
+
 /* HAPPY: senyum lebar, mata cerah, gerak hidup */
 .pet-card[data-state="HAPPY"] .shark {
   animation: sharkBobHappy 2.4s ease-in-out infinite;
@@ -861,6 +905,32 @@ body.pet-ready #petCard {
   color: #0f1218;
 }
 
+.dfa-legend {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.dfa-legend p {
+  margin-bottom: 0.45rem;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.dfa-legend ul {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.4rem 1rem;
+}
+
+.dfa-legend li strong {
+  color: var(--state-accent);
+  margin-right: 0.25rem;
+}
+
 /* Log — chat style */
 .log-chat {
   background: #0a0c10;
@@ -911,6 +981,11 @@ body.pet-ready #petCard {
 }
 
 /* Per-state CSS variables on #petCard[data-state] */
+.pet-card[data-state="NORMAL"] {
+  --state-accent: #0ea5e9;
+  --state-glow: rgba(14, 165, 233, 0.3);
+}
+
 .pet-card[data-state="HAPPY"] {
   --state-accent: #22c55e;
   --state-glow: rgba(34, 197, 94, 0.35);

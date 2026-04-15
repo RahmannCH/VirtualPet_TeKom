@@ -2,7 +2,7 @@
  * Virtual Pet (DFA / Deterministic Finite Automaton)
  * Tema: keseharian mahasiswa di lingkungan kampus
  *
- * Q  = { HAPPY, HUNGRY, TIRED, BORED, SICK, DEAD }
+ * Q  = { NORMAL, HAPPY, HUNGRY, TIRED, BORED, SICK, DEAD }
  * Σ  = { FEED, PLAY, SLEEP, STUDY }
  * q₀ = acak dari Q \ {DEAD}
  * F  = { DEAD }   ← state penyerap (absorbing state)
@@ -10,18 +10,16 @@
  * δ  = fungsi transisi (lengkap & deterministik), lihat objek `transitions`.
  *
  * Prinsip desain transisi:
- *  - Setiap pemulihan berjalan BERTAHAP (tidak ada lompatan langsung ke HAPPY
- *    kecuali dari kondisi yang memang sudah dekat happy, yaitu BORED).
- *  - Aksi yang tidak cocok dengan kondisi memberikan hasil yang lebih buruk
- *    atau paling tidak tidak membaik.
+ *  - Setiap pemulihan berjalan BERTAHAP dan masuk akal.
+ *  - Aksi yang tidak sesuai dengan kebutuhan tubuh akan memperburuk kondisi.
  *  - STUDY menggantikan CLEAN agar selaras tema kampus.
  */
 
-const STATES  = ["HAPPY", "HUNGRY", "TIRED", "BORED", "SICK", "DEAD"];
+const STATES  = ["NORMAL", "HAPPY", "HUNGRY", "TIRED", "BORED", "SICK", "DEAD"];
 const ACTIONS = ["FEED", "PLAY", "SLEEP", "STUDY"];
 
 /** Hanya state yang boleh jadi kondisi awal */
-const START_POOL = ["HAPPY", "HUNGRY", "TIRED", "BORED", "SICK"];
+const START_POOL = ["NORMAL", "HAPPY", "HUNGRY", "TIRED", "BORED", "SICK"];
 
 /** Nama bawaan jika input kosong */
 const DEFAULT_PET_NAME = "Jono";
@@ -29,50 +27,54 @@ const DEFAULT_PET_NAME = "Jono";
 /**
  * Tabel δ — setiap (state, aksi) dipetakan ke tepat satu state berikutnya.
  *
- * Rasionalisasi per baris:
+ * Rasionalisasi:
+ *
+ * NORMAL:
+ *   FEED  → HAPPY  (Makan enak di kantin bikin mood naik)
+ *   PLAY  → HUNGRY (Keasikan main/nongkrong bikin perut keroncongan)
+ *   SLEEP → HAPPY  (Tidur siang sebentar bikin segar dan semangat)
+ *   STUDY → BORED  (Baru mulai belajar, tapi materi yang monoton bikin pikiran mulai jenuh)
  *
  * HAPPY:
- *   FEED  → HAPPY  (makan saat kondisi oke, energi stabil)
- *   PLAY  → TIRED  (olahraga/main wajar bikin capek)
- *   SLEEP → HAPPY  (tidur cukup mempertahankan kondisi prima)
- *   STUDY → BORED  (belajar terus-menerus tanpa variasi bikin jenuh)
+ *   FEED  → HAPPY  (Kenyang dan senang)
+ *   PLAY  → HUNGRY (Main seru-seruan bikin energi terkuras dan laper)
+ *   SLEEP → HAPPY  (Istirahat dalam kondisi tenang)
+ *   STUDY → NORMAL (Kembali ke mode serius setelah senang)
  *
  * HUNGRY:
- *   FEED  → TIRED  (perut kenyang, tapi badan tetap butuh istirahat,
- *                   belum cukup untuk langsung happy)
- *   PLAY  → SICK   (olahraga saat perut kosong → pusing & drop)
- *   SLEEP → HUNGRY (tidur lapar → bangun tetap lapar, perut protes)
- *   STUDY → SICK   (belajar keras saat lapar → konsentrasi buyar, badan makin drop)
+ *   FEED  → NORMAL (Perut terisi, kondisi kembali stabil)
+ *   PLAY  → TIRED  (Main pas lapar bikin gampang capek)
+ *   SLEEP → HUNGRY (Tidur perut kosong, bangun makin keroncongan)
+ *   STUDY → SICK   (Maksa belajar pas lapar bikin drop/sakit)
  *
  * TIRED:
- *   FEED  → HUNGRY (glukosa sedikit naik, tapi sadar tubuh butuh makan beneran
- *                   → sinyal lapar muncul lebih jelas setelah sedikit pulih)
- *   PLAY  → SICK   (maksa aktivitas fisik saat capek → kondisi memburuk)
- *   SLEEP → HAPPY  (satu-satunya obat capek yang beneran: tidur cukup)
- *   STUDY → BORED  (nugas/belajar saat capek → jenuh karena susah masuk)
+ *   FEED  → NORMAL (Asupan energi mengembalikan tenaga)
+ *   PLAY  → SICK   (Maksa aktivitas fisik pas capek bikin ambruk)
+ *   SLEEP → NORMAL (Satu-satunya cara pulih dari capek: tidur)
+ *   STUDY → SICK   (Udah capek tapi maksa nugas terus, badan beneran drop dan meriang)
  *
  * BORED:
- *   FEED  → HUNGRY (ngemil dikit, tapi sadar yang kurang adalah aktivitas, bukan makanan
- *                   → malah jadi lapar beneran karena insting tubuh)
- *   PLAY  → HAPPY  (akhirnya gerak/ngobrol sama temen → semangat balik)
- *   SLEEP → TIRED  (tidur di jam bosennya → bangun badan berat & grogi)
- *   STUDY → HAPPY  (mulai mengerjakan tugas yang tertunda → produktif, bosennya reda)
+ *   FEED  → NORMAL (Makan lumayan lah buat ngisi waktu dan energi)
+ *   PLAY  → HAPPY  (Main game/nongkrong bikin mood balik)
+ *   SLEEP → NORMAL (Tidur ngilangin rasa gabut)
+ *   STUDY → TIRED  (Udah bosen tapi dipaksa belajar lagi, badan jadi terasa capek banget)
  *
  * SICK:
- *   FEED  → TIRED  (makan sup/bubur → mulai pulih, tapi masih lemas)
- *   PLAY  → DEAD   (maksa aktivitas saat sakit → tubuh kolaps total, burnout)
- *   SLEEP → TIRED  (istirahat membantu pemulihan, tapi belum cukup satu ronde)
- *   STUDY → BORED  (maksa belajar saat sakit → materi nggak masuk, jenuh & frustasi)
+ *   FEED  → TIRED  (Makan sup anget bikin badan mendingan tapi masih lemas)
+ *   PLAY  → DEAD   (Lagi sakit dipake lari-lari, kolaps total)
+ *   SLEEP → NORMAL (Istirahat total obat paling manjur)
+ *   STUDY → DEAD   (Lagi sakit maksa nugas non-stop, tubuh akhirnya kolaps total)
  *
  * DEAD (absorbing state):
  *   semua aksi → DEAD
  */
 const transitions = {
-  HAPPY:  { FEED: "HAPPY",  PLAY: "TIRED",  SLEEP: "HAPPY",  STUDY: "BORED"  },
-  HUNGRY: { FEED: "TIRED",  PLAY: "SICK",   SLEEP: "HUNGRY", STUDY: "SICK"   },
-  TIRED:  { FEED: "HUNGRY", PLAY: "SICK",   SLEEP: "HAPPY",  STUDY: "BORED"  },
-  BORED:  { FEED: "HUNGRY", PLAY: "HAPPY",  SLEEP: "TIRED",  STUDY: "HAPPY"  },
-  SICK:   { FEED: "TIRED",  PLAY: "DEAD",   SLEEP: "TIRED",  STUDY: "BORED"  },
+  NORMAL: { FEED: "HAPPY",  PLAY: "HUNGRY", SLEEP: "HAPPY",  STUDY: "BORED"  },
+  HAPPY:  { FEED: "HAPPY",  PLAY: "HUNGRY", SLEEP: "HAPPY",  STUDY: "NORMAL" },
+  HUNGRY: { FEED: "NORMAL", PLAY: "TIRED",  SLEEP: "HUNGRY", STUDY: "SICK"   },
+  TIRED:  { FEED: "NORMAL", PLAY: "SICK",   SLEEP: "NORMAL", STUDY: "SICK"   },
+  BORED:  { FEED: "NORMAL", PLAY: "HAPPY",  SLEEP: "NORMAL", STUDY: "TIRED"  },
+  SICK:   { FEED: "TIRED",  PLAY: "DEAD",   SLEEP: "NORMAL", STUDY: "DEAD"   },
   DEAD:   { FEED: "DEAD",   PLAY: "DEAD",   SLEEP: "DEAD",   STUDY: "DEAD"   }
 };
 
@@ -109,12 +111,13 @@ function pickRandomStartState() {
 /** Deskripsi kondisi per state — konteks kampus. */
 function getStateDescription(state) {
   const map = {
-    HAPPY:  "Semangat kuliah, mood oke, siap nangkep materi dan kerjain tugas.",
-    HUNGRY: "Laper abis kuliah, perut kosong, susah fokus dan kepikiran terus.",
-    TIRED:  "Capek banget — badan minta istirahat, deadline numpuk di kepala.",
-    BORED:  "Jenuh, jam kerasa lama, nggak ada yang menarik, gabut total.",
-    SICK:   "Badan drop, meriang. Butuh istirahat beneran, jangan dipaksain.",
-    DEAD:   "Burnout total — nggak ada respons. State penyerap, permanen."
+    NORMAL: "Kondisi stabil, siap menjalani hari di kampus dengan santai.",
+    HAPPY:  "Mood sangat bagus! Semangat kuliah dan produktivitas lagi tinggi.",
+    HUNGRY: "Perut mulai keroncongan, butuh asupan biar bisa fokus lagi.",
+    TIRED:  "Tenaga terkuras habis, badan terasa berat, butuh istirahat.",
+    BORED:  "Gabut banget, jam kuliah kerasa lama, butuh hiburan.",
+    SICK:   "Badan nggak fit, meriang. Harus istirahat kalau nggak mau makin parah.",
+    DEAD:   "Burnout total — kolaps karena terlalu dipaksakan. Game over."
   };
   return map[state] || "";
 }
@@ -126,74 +129,71 @@ function getStateDescription(state) {
 function getTransitionNarration(prev, action, next) {
   const key   = prev + "|" + action;
   const lines = {
+    /* ── NORMAL ── */
+    "NORMAL|FEED":
+      "Makan siang enak di kantin, mood langsung naik drastis (HAPPY).",
+    "NORMAL|PLAY":
+      "Keasikan nongkrong bareng temen di koridor, tenaga terkuras dan perut jadi laper (HUNGRY).",
+    "NORMAL|SLEEP":
+      "Tidur siang sebentar, bangun-bangun badan terasa segar dan bersemangat (HAPPY).",
+    "NORMAL|STUDY":
+      "Baru mulai belajar, tapi materi yang monoton bikin pikiran mulai jenuh (BORED).",
+
     /* ── HAPPY ── */
     "HAPPY|FEED":
-      "Makan siang di kantin sambil ngobrol sama temen, energi tetap stabil, " +
-      "kondisi nggak berubah (HAPPY).",
+      "Makan camilan favorit sambil senyum-senyum sendiri, mood makin mantap (HAPPY).",
     "HAPPY|PLAY":
-      "Olahraga atau ikut lomba kampus — seru, tapi tenaga terkuras. " +
-      "Butuh istirahat sekarang (TIRED).",
+      "Main seru-seruan bareng temen, saking semangatnya energi terkuras dan perut jadi keroncongan (HUNGRY).",
     "HAPPY|SLEEP":
-      "Tidur cukup di jam malam, bangun segar dan siap jalani hari (HAPPY).",
+      "Tidur dalam kondisi hati senang, bangun tetap dalam kondisi prima (HAPPY).",
     "HAPPY|STUDY":
-      "Belajar non-stop tanpa jeda, materi makin banyak, pikiran mulai jenuh (BORED).",
+      "Belajar dengan efektif, sekarang kembali ke mode produktif biasa (NORMAL).",
 
     /* ── HUNGRY ── */
     "HUNGRY|FEED":
-      "Akhirnya makan — perut kenyang. Tapi badan tetap butuh istirahat, " +
-      "belum cukup buat balik semangat (TIRED).",
+      "Akhirnya makan — perut kenyang, kondisi badan kembali stabil (NORMAL).",
     "HUNGRY|PLAY":
-      "Dipaksa olahraga pas perut kosong — pusing, mual, kondisi langsung drop (SICK).",
+      "Maksa main pas perut kosong, badan jadi makin lemas dan capek (TIRED).",
     "HUNGRY|SLEEP":
-      "Tidur sambil lapar, bangunnya masih lapar. Perut protes dari tadi (HUNGRY).",
+      "Tidur sambil nahan lapar, pas bangun perut makin keroncongan (HUNGRY).",
     "HUNGRY|STUDY":
-      "Maksa belajar saat lapar — konsentrasi buyar, kepala pusing, " +
-      "badan makin nggak karuan (SICK).",
+      "Maksa mikir keras pas lapar, kepala pusing dan badan mulai drop (SICK).",
 
     /* ── TIRED ── */
     "TIRED|FEED":
-      "Ngemil atau makan ringan — glukosa sedikit naik, tapi badan baru sadar " +
-      "butuh asupan lebih, sinyal lapar muncul jelas (HUNGRY).",
+      "Makan berat pas lagi capek, asupan energi bikin badan mendingan (NORMAL).",
     "TIRED|PLAY":
-      "Maksa gerak dan main padahal udah capek — tubuh kepayahan, kondisi memburuk (SICK).",
+      "Udah capek tapi maksa olahraga, badan nggak kuat dan akhirnya meriang (SICK).",
     "TIRED|SLEEP":
-      "Tidur nyenyak semalam suntuk. Bangun pagi, badan segar, semangat balik (HAPPY).",
+      "Tidur nyenyak semalaman, bangun pagi badan sudah segar kembali (NORMAL).",
     "TIRED|STUDY":
-      "Nugas sambil ngantuk-ngantukan — materi nggak nyangkut, pikiran melayang, " +
-      "yang ada malah makin jenuh (BORED).",
+      "Udah capek tapi maksa nugas terus, badan beneran drop dan meriang (SICK).",
 
     /* ── BORED ── */
     "BORED|FEED":
-      "Ngemil iseng buat ngisi waktu — tapi yang kurang bukan makanan. " +
-      "Malah jadi ngerasa lapar beneran (HUNGRY).",
+      "Makan karena gabut, lumayan lah buat ngisi waktu dan energi (NORMAL).",
     "BORED|PLAY":
-      "Akhirnya gerak — main bareng temen, ketawa-ketawa, " +
-      "jenuhnya langsung ilang (HAPPY).",
+      "Main bareng temen, ketawa-ketawa, semangat langsung balik lagi (HAPPY).",
     "BORED|SLEEP":
-      "Tidur siang pas jenuh — bangunnya justru badan terasa berat dan grogi (TIRED).",
+      "Daripada gabut mending tidur, bangun-bangun pikiran jadi jernih lagi (NORMAL).",
     "BORED|STUDY":
-      "Mulai ngerjain tugas yang tertunda, fokus perlahan datang, " +
-      "produktif dan bosennya reda (HAPPY).",
+      "Udah bosen tapi dipaksa belajar lagi, badan jadi terasa capek banget (TIRED).",
 
     /* ── SICK ── */
     "SICK|FEED":
-      "Minum sup anget dan makan bubur — mulai pulih sedikit, tapi masih lemas. " +
-      "Perlu istirahat lagi (TIRED).",
+      "Minum sup anget dan makan bubur, badan mendingan tapi masih lemas (TIRED).",
     "SICK|PLAY":
-      "Dipaksa ngelakuin aktivitas berat saat sakit — tubuh kolaps, " +
-      "nggak ada tenaga tersisa sama sekali (DEAD).",
+      "Lagi sakit malah maksa lari-lari, tubuh kolaps total (DEAD).",
     "SICK|SLEEP":
-      "Istirahat di kos — demam agak turun, tapi sepenuhnya belum pulih. " +
-      "Masih butuh lebih banyak waktu (TIRED).",
+      "Istirahat total seharian di kos, akhirnya badan kembali bugar (NORMAL).",
     "SICK|STUDY":
-      "Maksa buka buku saat badan nggak fit — materi nggak masuk, " +
-      "makin frustrasi dan jenuh (BORED).",
+      "Lagi sakit maksa nugas non-stop, tubuh akhirnya kolaps total (DEAD).",
 
     /* ── DEAD (absorbing) ── */
-    "DEAD|FEED":  "Nggak ada respons — burnout total. State ini permanen (DEAD).",
-    "DEAD|PLAY":  "Nggak ada respons — burnout total. State ini permanen (DEAD).",
-    "DEAD|SLEEP": "Nggak ada respons — burnout total. State ini permanen (DEAD).",
-    "DEAD|STUDY": "Nggak ada respons — burnout total. State ini permanen (DEAD)."
+    "DEAD|FEED":  "Sudah tidak ada respons — burnout total (DEAD).",
+    "DEAD|PLAY":  "Sudah tidak ada respons — burnout total (DEAD).",
+    "DEAD|SLEEP": "Sudah tidak ada respons — burnout total (DEAD).",
+    "DEAD|STUDY": "Sudah tidak ada respons — burnout total (DEAD)."
   };
   return lines[key] || prev + " + " + action + " → " + next;
 }
